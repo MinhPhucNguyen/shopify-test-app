@@ -12,10 +12,12 @@ export async function getQRCode(id, graphql) {
   return supplementQRCode(qrCode, graphql);
 }
 
-export async function getQRCodes(shop, graphql) {
+export async function getQRCodes(shop, graphql, limit, offset = 1) {
   const qrCodes = await db.qRCode.findMany({
     where: { shop },
     orderBy: { id: "desc" },
+    take: limit,
+    skip: offset,
   });
 
   if (qrCodes.length === 0) return [];
