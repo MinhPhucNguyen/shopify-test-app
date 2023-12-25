@@ -1,0 +1,27 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+name = "test-app"
+client_id = "68eb73f3e71b59ebafe59925cb74e007"
+application_url = "https://hopkins-adventures-germany-veterans.trycloudflare.com"
+embedded = true
+
+[access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+scopes = "write_products"
+
+[auth]
+redirect_urls = [
+  "https://hopkins-adventures-germany-veterans.trycloudflare.com/auth/callback",
+  "https://hopkins-adventures-germany-veterans.trycloudflare.com/auth/shopify/callback",
+  "https://hopkins-adventures-germany-veterans.trycloudflare.com/api/auth/callback"
+]
+
+[webhooks]
+api_version = "2023-10"
+
+[pos]
+embedded = false
+
+[build]
+automatically_update_urls_on_dev = true
+dev_store_url = "mydevstoresub.myshopify.com"
