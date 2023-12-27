@@ -11,7 +11,6 @@ import {
   Text,
   Icon,
   InlineStack,
-  LegacyCard,
   IndexFilters,
   useSetIndexFiltersMode,
 } from "@shopify/polaris";
@@ -97,9 +96,9 @@ export default function Index() {
   useEffect(() => {
     const timer = setTimeout(() => {
       if (inputValue.trim() !== "") {
-        navigate(`/app?q=${inputValue}`);
+        // navigate(`/app?q=${inputValue}`);
       } else {
-        navigate(`/app`);
+        // navigate(`/app`);
       }
     }, 500);
 
@@ -152,52 +151,50 @@ export default function Index() {
       <Layout>
         <Layout.Section>
           <Card padding="0">
-            <LegacyCard>
-              <IndexFilters
-                queryValue={inputValue}
-                queryPlaceholder="Searching in all"
-                onQueryChange={handleFiltersQueryChange}
-                onQueryClear={() => setInputValue("")}
-                cancelAction={{
-                  onAction: onHandleCancel,
-                  disabled: false,
-                  loading: false,
-                }}
-                tabs={tabs}
-                mode={mode}
-                setMode={setMode}
-                hideFilters
-              />
-              <IndexTable
-                resourceName={{
-                  singular: "QR code",
-                  plural: "QR codes",
-                }}
-                itemCount={qrCodes.length}
-                headings={[
-                  { title: "Thumbnail", hidden: true },
-                  { title: "Title" },
-                  { title: "Product" },
-                  { title: "Date created" },
-                  { title: "Scans" },
-                ]}
-                selectable={false}
-                pagination={{
-                  hasNext: currentPage * itemsPerPage < getQRCodeLength,
-                  onNext: () => {
-                    handleNext();
-                  },
-                  hasPrevious: currentPage === 1 ? false : true,
-                  onPrevious: () => {
-                    handlePrevious();
-                  },
-                }}
-              >
-                {qrCodes.map((qrCode) => (
-                  <QRTableRow key={qrCode.id} qrCode={qrCode} />
-                ))}
-              </IndexTable>
-            </LegacyCard>
+            <IndexFilters
+              queryValue={inputValue}
+              queryPlaceholder="Searching in all"
+              onQueryChange={handleFiltersQueryChange}
+              onQueryClear={() => setInputValue("")}
+              cancelAction={{
+                onAction: onHandleCancel,
+                disabled: false,
+                loading: false,
+              }}
+              tabs={tabs}
+              mode={mode}
+              setMode={setMode}
+              hideFilters
+            />
+            <IndexTable
+              resourceName={{
+                singular: "QR code",
+                plural: "QR codes",
+              }}
+              itemCount={qrCodes.length}
+              headings={[
+                { title: "Thumbnail", hidden: true },
+                { title: "Title" },
+                { title: "Product" },
+                { title: "Date created" },
+                { title: "Scans" },
+              ]}
+              selectable={false}
+              pagination={{
+                hasNext: currentPage * itemsPerPage < getQRCodeLength,
+                onNext: () => {
+                  handleNext();
+                },
+                hasPrevious: currentPage === 1 ? false : true,
+                onPrevious: () => {
+                  handlePrevious();
+                },
+              }}
+            >
+              {qrCodes.map((qrCode) => (
+                <QRTableRow key={qrCode.id} qrCode={qrCode} />
+              ))}
+            </IndexTable>
           </Card>
         </Layout.Section>
       </Layout>
