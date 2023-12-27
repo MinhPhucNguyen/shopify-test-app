@@ -4,7 +4,6 @@ import { useLoaderData, Link, useNavigate } from "@remix-run/react";
 import { authenticate } from "../shopify.server";
 import {
   Card,
-  EmptyState,
   Layout,
   Page,
   IndexTable,
@@ -17,40 +16,35 @@ import {
   useSetIndexFiltersMode,
 } from "@shopify/polaris";
 
-import { getQRCodes } from "../models/QRCode.server";
+import { getQRCodes, getQRCodeCount } from "../models/QRCode.server";
 import { DiamondAlertMajor, ImageMajor } from "@shopify/polaris-icons";
 
 export async function loader({ request }) {
+  let qrCodes = [];
   const { admin, session } = await authenticate.admin(request);
   const searchParams = new URLSearchParams(request.url.split("?")[1]); // Lấy phần query string từ URL
+
   const page = Number(searchParams.get("page")) || 1;
+  const qSearch = searchParams.get("q") || "";
 
   const itemsPerPage = 5;
   const offset = (page - 1) * itemsPerPage;
-  const qrCodes = await getQRCodes(
+
+  qrCodes = await getQRCodes(
     session.shop,
     admin.graphql,
     itemsPerPage,
-    offset
+    offset,
+    qSearch.trim() !== "" ? qSearch : ""
   );
+
+  const getQRCodeLength = await getQRCodeCount(session.shop);
 
   return json({
     qrCodes,
+    getQRCodeLength,
   });
 }
-
-const EmptyQRCodeState = ({ onAction }) => (
-  <EmptyState
-    heading="Create unique QR codes for your product"
-    action={{
-      content: "Create QR code",
-      onAction,
-    }}
-    image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
-  >
-    <p>Allow customers to scan codes and buy products using their phones.</p>
-  </EmptyState>
-);
 
 function truncate(str, { length = 25 } = {}) {
   if (!str) return "";
@@ -92,18 +86,24 @@ const QRTableRow = ({ qrCode }) => (
 );
 
 export default function Index() {
-  const { qrCodes, request } = useLoaderData();
+  const { qrCodes, getQRCodeLength } = useLoaderData();
   const navigate = useNavigate();
   const [itemStrings, setItemStrings] = useState(["All"]);
   const [inputValue, setInputValue] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
+  //debounce
   useEffect(() => {
     const timer = setTimeout(() => {
-      console.log("inputValue", inputValue);
-    }, 1000);
+      if (inputValue.trim() !== "") {
+        navigate(`/app?q=${inputValue}`);
+      } else {
+        navigate(`/app`);
+      }
+    }, 500);
 
+    //cleanup
     return () => clearTimeout(timer);
   }, [inputValue]);
 
@@ -123,19 +123,23 @@ export default function Index() {
     []
   );
 
-  const fetchQRCodes = async () => {
-    const offset = (currentPage - 1) * itemsPerPage;
-  };
-
   // Pagination
-  const handleNext = () => {
-    setCurrentPage((prevPage) => prevPage + 1);
-    navigate(`/app?page=${currentPage + 1}`);
-  };
-
   const handlePrevious = () => {
     setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
-    navigate(`/app?page=${currentPage - 1}`);
+    navigate(
+      `/app?page=${currentPage - 1}${
+        inputValue.trim() !== "" ? `&q=${inputValue}` : ""
+      }`
+    );
+  };
+
+  const handleNext = () => {
+    setCurrentPage((prevPage) => prevPage + 1);
+    navigate(
+      `/app?page=${currentPage + 1}${
+        inputValue.trim() !== "" ? `&q=${inputValue}` : ""
+      }`
+    );
   };
 
   return (
@@ -148,58 +152,52 @@ export default function Index() {
       <Layout>
         <Layout.Section>
           <Card padding="0">
-            {qrCodes.length === 0 ? (
-              <EmptyQRCodeState onAction={() => navigate("qrcodes/new")} />
-            ) : (
-              <LegacyCard>
-                <IndexFilters
-                  queryValue={inputValue}
-                  queryPlaceholder="Searching in all"
-                  onQueryChange={handleFiltersQueryChange}
-                  onQueryClear={() => setInputValue("")}
-                  cancelAction={{
-                    onAction: onHandleCancel,
-                    disabled: false,
-                    loading: false,
-                  }}
-                  tabs={tabs}
-                  filters={[]}
-                  appliedFilters={[]}
-                  mode={mode}
-                  setMode={setMode}
-                  hideFilters
-                />
-                <IndexTable
-                  resourceName={{
-                    singular: "QR code",
-                    plural: "QR codes",
-                  }}
-                  itemCount={qrCodes.length}
-                  headings={[
-                    { title: "Thumbnail", hidden: true },
-                    { title: "Title" },
-                    { title: "Product" },
-                    { title: "Date created" },
-                    { title: "Scans" },
-                  ]}
-                  selectable={false}
-                  pagination={{
-                    hasNext: true,
-                    onNext: () => {
-                      handleNext();
-                    },
-                    hasPrevious: true,
-                    onPrevious: () => {
-                      handlePrevious();
-                    },
-                  }}
-                >
-                  {qrCodes.map((qrCode) => (
-                    <QRTableRow key={qrCode.id} qrCode={qrCode} />
-                  ))}
-                </IndexTable>
-              </LegacyCard>
-            )}
+            <LegacyCard>
+              <IndexFilters
+                queryValue={inputValue}
+                queryPlaceholder="Searching in all"
+                onQueryChange={handleFiltersQueryChange}
+                onQueryClear={() => setInputValue("")}
+                cancelAction={{
+                  onAction: onHandleCancel,
+                  disabled: false,
+                  loading: false,
+                }}
+                tabs={tabs}
+                mode={mode}
+                setMode={setMode}
+                hideFilters
+              />
+              <IndexTable
+                resourceName={{
+                  singular: "QR code",
+                  plural: "QR codes",
+                }}
+                itemCount={qrCodes.length}
+                headings={[
+                  { title: "Thumbnail", hidden: true },
+                  { title: "Title" },
+                  { title: "Product" },
+                  { title: "Date created" },
+                  { title: "Scans" },
+                ]}
+                selectable={false}
+                pagination={{
+                  hasNext: currentPage * itemsPerPage < getQRCodeLength,
+                  onNext: () => {
+                    handleNext();
+                  },
+                  hasPrevious: currentPage === 1 ? false : true,
+                  onPrevious: () => {
+                    handlePrevious();
+                  },
+                }}
+              >
+                {qrCodes.map((qrCode) => (
+                  <QRTableRow key={qrCode.id} qrCode={qrCode} />
+                ))}
+              </IndexTable>
+            </LegacyCard>
           </Card>
         </Layout.Section>
       </Layout>

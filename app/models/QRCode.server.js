@@ -12,19 +12,34 @@ export async function getQRCode(id, graphql) {
   return supplementQRCode(qrCode, graphql);
 }
 
-export async function getQRCodes(shop, graphql, limit, offset = 1) {
-  const qrCodes = await db.qRCode.findMany({
-    where: { shop },
+export async function getQRCodes(
+  shop,
+  graphql,
+  limit,
+  offset = 1,
+  qSearch = ""
+) {
+  const query = {
+    where: {
+      shop,
+      title: { contains: qSearch },
+    },
     orderBy: { id: "desc" },
     take: limit,
     skip: offset,
-  });
+  };
+
+  const qrCodes = await db.qRCode.findMany(query);
 
   if (qrCodes.length === 0) return [];
 
   return Promise.all(
     qrCodes.map((qrCode) => supplementQRCode(qrCode, graphql))
   );
+}
+
+export async function getQRCodeCount(shop) {
+  return db.qRCode.count({ where: { shop } });
 }
 
 export function getQRCodeImage(id) {
