@@ -96,9 +96,9 @@ export default function Index() {
   useEffect(() => {
     const timer = setTimeout(() => {
       if (inputValue.trim() !== "") {
-        // navigate(`/app?q=${inputValue}`);
+        navigate(`/app?q=${inputValue}`);
       } else {
-        // navigate(`/app`);
+        navigate(`/app`);
       }
     }, 500);
 

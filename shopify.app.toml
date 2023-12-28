@@ -2,7 +2,7 @@
 
 name = "test-app"
 client_id = "68eb73f3e71b59ebafe59925cb74e007"
-application_url = "https://someone-zoo-school-goals.trycloudflare.com"
+application_url = "https://receptor-discovered-smile-increases.trycloudflare.com"
 embedded = true
 
 [access_scopes]
@@ -11,9 +11,9 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://someone-zoo-school-goals.trycloudflare.com/auth/callback",
-  "https://someone-zoo-school-goals.trycloudflare.com/auth/shopify/callback",
-  "https://someone-zoo-school-goals.trycloudflare.com/api/auth/callback"
+  "https://receptor-discovered-smile-increases.trycloudflare.com/auth/callback",
+  "https://receptor-discovered-smile-increases.trycloudflare.com/auth/shopify/callback",
+  "https://receptor-discovered-smile-increases.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]
