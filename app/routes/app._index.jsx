@@ -92,6 +92,22 @@ export default function Index() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
+  const sortOptions = [
+    {
+      label: "Date created",
+      value: "created asc",
+      directionLabel: "Ascending",
+    },
+    {
+      label: "Date created",
+      value: "created desc",
+      directionLabel: "Descending",
+    },
+    { label: "Title", value: "title asc", directionLabel: "A-Z" },
+    { label: "Title", value: "title desc", directionLabel: "Z-A" },
+  ];
+  const [sortSelected, setSortSelected] = useState(["created asc"]);
+
   //debounce
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -152,6 +168,9 @@ export default function Index() {
         <Layout.Section>
           <Card padding="0">
             <IndexFilters
+              sortOptions={sortOptions}
+              sortSelected={sortSelected}
+              onSort={setSortSelected}
               queryValue={inputValue}
               queryPlaceholder="Searching in all"
               onQueryChange={handleFiltersQueryChange}
