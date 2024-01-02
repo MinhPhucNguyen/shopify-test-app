@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { json } from "@remix-run/node";
 import { useLoaderData, Link, useNavigate } from "@remix-run/react";
 import { authenticate } from "../shopify.server";
@@ -17,12 +17,13 @@ import {
 
 import { getQRCodes, getQRCodeCount } from "../models/QRCode.server";
 import { DiamondAlertMajor, ImageMajor } from "@shopify/polaris-icons";
+import { useQRCodeContext } from "../context/QRCodeContext";
 
 export async function loader({ request }) {
-  let qrCodes = [];
   const { admin, session } = await authenticate.admin(request);
   const searchParams = new URLSearchParams(request.url.split("?")[1]); // Lấy phần query string từ URL
 
+  let qrCodes = [];
   const page = Number(searchParams.get("page")) || 1;
   const qSearch = searchParams.get("q") || "";
 
@@ -86,11 +87,18 @@ const QRTableRow = ({ qrCode }) => (
 
 export default function Index() {
   const { qrCodes, getQRCodeLength } = useLoaderData();
+  const { state, dispatch } = useQRCodeContext();
   const navigate = useNavigate();
   const [itemStrings, setItemStrings] = useState(["All"]);
   const [inputValue, setInputValue] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
+
+  const inputValueRef = useRef(inputValue);
+
+  useEffect(() => {
+    inputValueRef.current = inputValue;
+  }, [inputValue]);
 
   const sortOptions = [
     {
@@ -108,19 +116,34 @@ export default function Index() {
   ];
   const [sortSelected, setSortSelected] = useState(["created asc"]);
 
-  //debounce
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (inputValue.trim() !== "") {
-        navigate(`/app?q=${inputValue}`);
+  const handleNavigation = useCallback(
+    (value) => {
+      if (value.trim() !== "") {
+        navigate(`/app?q=${value}`);
       } else {
         navigate(`/app`);
       }
+    },
+    [navigate]
+  );
+
+  //debounce
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const currentInputValue = inputValueRef.current.trim();
+      if (currentInputValue !== "") {
+        // dispatch({ type: "SET_SEARCH_QUERY", payload: currentInputValue });
+        handleNavigation(currentInputValue);
+      } else {
+        // dispatch({ type: "SET_SEARCH_QUERY", payload: "" });
+        handleNavigation("");
+      }
+      console.log(state);
     }, 500);
 
     //cleanup
     return () => clearTimeout(timer);
-  }, [inputValue]);
+  }, [inputValue, handleNavigation]);
 
   const tabs = itemStrings.map((item, index) => ({
     content: item,

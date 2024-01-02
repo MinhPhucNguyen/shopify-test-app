@@ -4,6 +4,7 @@ import polarisStyles from "@shopify/polaris/build/esm/styles.css";
 import { boundary } from "@shopify/shopify-app-remix/server";
 import { AppProvider } from "@shopify/shopify-app-remix/react";
 import { authenticate } from "../shopify.server";
+import { QRCodeProvider } from "../context/QRCodeContext";
 
 export const links = () => [{ rel: "stylesheet", href: polarisStyles }];
 
@@ -23,7 +24,9 @@ export default function App() {
           Home
         </Link>
       </ui-nav-menu>
-      <Outlet />
+      <QRCodeProvider>
+        <Outlet />
+      </QRCodeProvider>
     </AppProvider>
   );
 }
