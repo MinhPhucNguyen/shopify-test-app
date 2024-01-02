@@ -138,7 +138,6 @@ export default function Index() {
         // dispatch({ type: "SET_SEARCH_QUERY", payload: "" });
         handleNavigation("");
       }
-      console.log(state);
     }, 500);
 
     //cleanup
