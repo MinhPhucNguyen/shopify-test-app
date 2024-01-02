@@ -180,6 +180,16 @@ export default function Index() {
     );
   };
 
+  const checkHasNext = () => {
+    if (currentPage * itemsPerPage < getQRCodeLength) {
+      if (qrCodes.length < itemsPerPage) {
+        return false;
+      }
+      return true;
+    }
+    return false;
+  };
+
   return (
     <Page>
       <ui-title-bar title="QR codes">
@@ -223,11 +233,11 @@ export default function Index() {
               ]}
               selectable={false}
               pagination={{
-                hasNext: currentPage * itemsPerPage < getQRCodeLength,
+                hasNext: checkHasNext(),
                 onNext: () => {
                   handleNext();
                 },
-                hasPrevious: currentPage === 1 ? false : true,
+                hasPrevious: currentPage > 1,
                 onPrevious: () => {
                   handlePrevious();
                 },
